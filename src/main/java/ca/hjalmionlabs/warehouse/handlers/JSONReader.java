@@ -94,17 +94,18 @@ public class JSONReader
 					size = WarehouseSize.parseSize(reader.nextString());
 				else if(objName.equals("owner"))
 				{
-					owner = WarehouseBot.getJDA().getUserById(Long.parseLong(reader.nextName()));
+					owner = WarehouseBot.getJDA().getUserById(Long.parseLong(reader.nextString()));
 				} else if(objName.equals("crates"))
 				{
 					crates = readCratesArray(reader);
 				}
 			}
+			reader.endObject();
 		} catch(IOException ioe)
 		{
 			ioe.printStackTrace();
 		}
-		return new Warehouse(name, size, owner);
+		return new Warehouse(name, size, owner, crates);
 	}
 	
 	public static List<Crate> readCratesArray(JsonReader reader)
@@ -116,6 +117,7 @@ public class JSONReader
 			reader.beginArray();
 			while(reader.hasNext())
 				crates.add(readCrate(reader));
+			reader.endArray();
 		} catch(IOException ioe)
 		{
 			ioe.printStackTrace();
@@ -148,6 +150,7 @@ public class JSONReader
 					reader.skipValue();
 				
 			}
+			reader.endObject();
 		} catch(IOException ioe)
 		{
 			ioe.printStackTrace();

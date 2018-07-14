@@ -38,6 +38,15 @@ public class Warehouse
 		crates = new ArrayList<Crate>(capacity);
 	}
 	
+	public Warehouse(String name, WarehouseSize size, User owner, List<Crate> crates)
+	{
+		this.name = name;
+		this.size = size;
+		this.capacity = calculateCapacity(size);
+		this.usage = crates.size();
+		this.owner = owner;
+		this.crates = crates;
+	}
 	
 	private int calculateCapacity(WarehouseSize size)
 	{

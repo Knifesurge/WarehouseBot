@@ -1,13 +1,17 @@
 package ca.hjalmionlabs.warehouse;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.hjalmionlabs.warehouse.entities.Crate;
 import ca.hjalmionlabs.warehouse.entities.Profile;
 import ca.hjalmionlabs.warehouse.entities.Warehouse;
-import ca.hjalmionlabs.warehouse.handlers.FileHandler;
 import ca.hjalmionlabs.warehouse.handlers.JSONReader;
 import ca.hjalmionlabs.warehouse.handlers.WarehouseHandler;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -33,17 +37,17 @@ public class WarehouseBotListener implements EventListener
 		warehouseHandler = new WarehouseHandler();
 		guilds = WarehouseBot.getGuilds();
 		userProfiles = new HashMap<Long, Profile>();
-		List<Profile> profiles = JSONReader.readJsonStream(WarehouseBotListener.class.getClassLoader().getResourceAsStream("dat\\profiles.dat"));
-		profiles.forEach(e -> {	// Iterate over each Profile
-			for(Guild g : guilds)	// Iterate over each Guild
-			{
-				for(Member m : g.getMembers())	// Iterate over each Member in the Guild
-				{
-					if(m.getUser().getIdLong() == e.getID())	// If IDs match b/w Member and Profile ID
-						userProfiles.put(e.getID(), e);			// Map ID to Profile
-				}
-			}
-		});
+		List<Profile> profiles = new ArrayList<Profile>();
+		try {
+			profiles = JSONReader.readJsonStream(Files.newInputStream(Paths.get("dat\\profiles.dat")));
+			profiles.forEach(e -> {
+				System.out.println(e);
+				userProfiles.put(e.getID(), e);
+			});
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		Crate.getCrateList().addAll(Crate.populateCrates());
 	}
 	
 	public void sendMessage(MessageReceivedEvent event, String msg)
@@ -108,7 +112,7 @@ public class WarehouseBotListener implements EventListener
 			{
 				if(isKnifesurge(e))
 				{
-					FileHandler.writeFile("dat\\profiles.dat", userProfiles);
+//					FileHandler.writeFile("dat\\profiles.dat", userProfiles);
 					WarehouseBot.getJDA().shutdown();
 				}
 			} else if(rawMsg.equals(PRECURSOR + "help"))
@@ -116,7 +120,8 @@ public class WarehouseBotListener implements EventListener
 				
 			} else if(rawMsg.equals(PRECURSOR + "profile"))
 			{
-				Profile profile = userProfiles.get(e.getMember().getUser().getIdLong());
+				Profile profile = userProfiles.get(author.getIdLong());
+				System.out.println("DEBUG: " + profile);
 				EmbedBuilder build = new EmbedBuilder();
 				build.setTitle(author.getName() + "'s Profile");
 				build.setDescription(profile.toString());
@@ -143,6 +148,51 @@ public class WarehouseBotListener implements EventListener
 							userProfiles.put(m.getUser().getIdLong(), new Profile(m));
 						}
 					}
+				}
+			} else if(rawMsg.equals(PRECURSOR + "getAllProfiles"))
+			{
+				EmbedBuilder embed = new EmbedBuilder();
+				embed.setTitle("User Profiles\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+				for(Guild g : guilds)
+				{
+					embed.appendDescription("\n-------------------------");
+					embed.appendDescription("\n" + g.getName() + "\n-------------------------");
+					for(Member m : g.getMembers())
+					{
+						embed.appendDescription("\n=========================");
+						embed.appendDescription("\n" + m.getUser().getName() + m.getUser().getDiscriminator() + "\n=========================");
+						embed.appendDescription("\n" + userProfiles.get(m.getUser().getIdLong()).toString());
+						embed.appendDescription("\n=========================");
+					}
+					embed.appendDescription("\n-------------------------");
+				}
+				sendEmbedMessage(e, embed);
+			} else if(rawMsg.equals(PRECURSOR + "crates"))
+			{
+				List<Crate> userCrates = userProfiles.get(author.getIdLong()).getCratesAsList();
+				EmbedBuilder embed = new EmbedBuilder();
+				embed.setTitle(author.getName() + "'s Crates");
+				userCrates.forEach(c -> {
+					embed.appendDescription(c.toString());
+				});
+				sendEmbedMessage(e, embed);
+			} else if(rawMsg.startsWith(PRECURSOR + "buy"))
+			{
+				String wholeMsg = rawMsg;
+				List<String> pieces = Arrays.asList(wholeMsg.split(" "));
+				String buying = pieces.get(0);	// Crates or a Warehouse?
+				String name = pieces.get(1);	// Name of crate or warehouse
+				String amt = pieces.get(2);		// Amount User is buying
+				if(buying.equals("crates"))
+				{
+					Crate toBuy = Crate.getCrateByName(name);
+					
+				} else if(buying.equals("warehouse"))
+				{
+					
+				} else
+				{
+					sendMessage(e, "Invalid argument!");	// DEBUG
 				}
 			}
 		}
