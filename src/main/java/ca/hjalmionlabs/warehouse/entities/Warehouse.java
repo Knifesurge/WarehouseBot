@@ -1,10 +1,8 @@
 package ca.hjalmionlabs.warehouse.entities;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import ca.hjalmionlabs.warehouse.readers.FileReader;
 import net.dv8tion.jda.core.entities.User;
 
 public class Warehouse
@@ -14,7 +12,8 @@ public class Warehouse
 	private WarehouseSize size;	// Represents the size of the warehouse
 	private int capacity;		// How much the warehouse can hold
 	private int usage;			// How much the warehouse is currently holding
-	private User owner;
+	private User owner;			// User that owns this Warehouse
+	private List<Crate> crates;	// List of Crates currently in this Warehose
 	
 	public Warehouse(String name, WarehouseSize size, User user)
 	{
@@ -23,6 +22,7 @@ public class Warehouse
 		this.owner = user;
 		this.capacity = calculateCapacity(size);
 		this.usage = 0;
+		crates = new ArrayList<Crate>(capacity);
 	}
 	
 	public Warehouse(WarehouseSize size, User user)
@@ -35,6 +35,7 @@ public class Warehouse
 		this.owner = user;
 		this.capacity = calculateCapacity(size);
 		this.usage = 0;
+		crates = new ArrayList<Crate>(capacity);
 	}
 	
 	
@@ -51,24 +52,6 @@ public class Warehouse
 			default:
 				return -1;
 		}
-	}
-	public static List<Warehouse> getUserWarehouseList(User user)
-	{
-		List<Warehouse> warehouses = new ArrayList<Warehouse>();
-		List<String> list = FileReader.readFile("dat\\warehouses\\" + user.getId());
-		list.forEach(e -> {
-			warehouses.add(parseWarehouse(e, user)); 
-		});
-		return warehouses;
-	}
-	
-	private static Warehouse parseWarehouse(String house, User user)
-	{
-		List<String> warehouse = Arrays.asList(house.split(";"));	// Split the String we are parsing into chunks, separated by ';'
-		String name = warehouse.get(0);
-		WarehouseSize size = WarehouseSize.parseSize(warehouse.get(1));
-		User owner = user;
-		return new Warehouse(name, size, owner);
 	}
 	
 	public String getName()
@@ -93,5 +76,16 @@ public class Warehouse
 	public User getOwner()
 	{
 		return owner;
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder build = new StringBuilder();
+		build.append(getName() + "\n" + getUsage() + "/" + getCapacity() + "\n=========================\n");
+		crates.forEach(e -> {
+			build.append(e.getName());
+		});
+		return build.toString();
 	}
 }

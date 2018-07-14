@@ -10,6 +10,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Game.GameType;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.managers.Presence;
 
 public class WarehouseBot
@@ -28,11 +29,16 @@ public class WarehouseBot
 			}
 			jda.addEventListener(new WarehouseBotListener());
 			Presence game = jda.getPresence();
-			game.setGame(Game.of(GameType.DEFAULT, "!>help"));
+			game.setGame(Game.of(GameType.DEFAULT, "$help"));
 	}
 	
 	public static JDA getJDA()
 	{
 		return jda;
+	}
+	
+	public static List<Guild> getGuilds()
+	{
+		return jda.getGuilds();
 	}
 }

@@ -9,5 +9,6 @@
 			<attribute name="javadoc_location" value="http://home.dv8tion.net:8080/job/JDA/javadoc/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/gson_lib"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

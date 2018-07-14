@@ -1,0 +1,16 @@
+Warehouse Discord Bot
+=========================
+
+- Able to buy warehouses (Small, Medium, Large)
+- Simple economy to be able to get money (Lotto, give command, etc)
+- Able to buy crates (maybe a minigame to get them?)
+- Can steal crates from other players
+- Sell crates to get money
+- Spend money to hire guards to protect your warehouse from being raided by another player
+- Spend money to purchase weapons to be able to more effectively raid other players
+
+For I/O functions:
+- Should load all Profiles and needed classes at bot startup
+- Should save in the event of a shutdown
+- Could save in the event of an unexpected shutdown
+- Could save periodically to assist with ^
