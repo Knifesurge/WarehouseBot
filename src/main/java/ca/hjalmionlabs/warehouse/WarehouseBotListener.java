@@ -43,7 +43,21 @@ public class WarehouseBotListener implements EventListener
 			profiles.forEach(e -> {
 				System.out.println(e);
 				userProfiles.put(e.getID(), e);
+				e.getWarehouses().forEach(v -> {
+					warehouseHandler.addWarehouse(v);
+				});
 			});
+			/* Check profile list and if a profile for a user is not present, create one */
+			for(Guild g : guilds)
+			{
+				for(Member m : g.getMembers())
+				{
+					User user = m.getUser();
+					long key = user.getIdLong();
+					if(!userProfiles.containsKey(key))
+						userProfiles.put(key, new Profile(m));
+				}
+			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -159,14 +173,35 @@ public class WarehouseBotListener implements EventListener
 					embed.appendDescription("\n" + g.getName() + "\n-------------------------");
 					for(Member m : g.getMembers())
 					{
-						embed.appendDescription("\n=========================");
-						embed.appendDescription("\n" + m.getUser().getName() + m.getUser().getDiscriminator() + "\n=========================");
-						embed.appendDescription("\n" + userProfiles.get(m.getUser().getIdLong()).toString());
-						embed.appendDescription("\n=========================");
+/*						if(embed.length() <= 2000)
+						{
+							embed.appendDescription("\n=========================");
+							embed.appendDescription("\n" + m.getUser().getName() + "#" + m.getUser().getDiscriminator() + "\n=========================");
+							embed.appendDescription("\n" + userProfiles.get(m.getUser().getIdLong()).toString());
+							embed.appendDescription("\n=========================");
+						} else	//embed.length() >= 2000
+						{
+							sendEmbedMessage(e, embed);
+							embed = new EmbedBuilder();
+							embed.setTitle("User Profiles Cont'd... \n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+						}
+*/						
+						/**************** OR *******************/
+						Profile profile = userProfiles.get(m.getUser().getIdLong());
+						if(profile.getMoney() != 0 && !profile.getWarehouses().isEmpty())	// Profile used
+						{
+							embed.appendDescription("\n=========================");
+							embed.appendDescription("\n" + m.getUser().getName() + "#" + m.getUser().getDiscriminator() + "\n=========================");
+							embed.appendDescription("\n" + userProfiles.get(m.getUser().getIdLong()).toString());
+							embed.appendDescription("\n=========================");
+						}
 					}
 					embed.appendDescription("\n-------------------------");
 				}
 				sendEmbedMessage(e, embed);
+			} else if(rawMsg.equals(PRECURSOR + "createNewProfile"))
+			{
+				
 			} else if(rawMsg.equals(PRECURSOR + "crates"))
 			{
 				List<Crate> userCrates = userProfiles.get(author.getIdLong()).getCratesAsList();

@@ -169,7 +169,7 @@ public class JSONReader
 	{
 		long id = -1L;
 		List<Warehouse> warehouses = new ArrayList<Warehouse>();
-		Map<List<Crate>, Warehouse> crates = new HashMap<List<Crate>, Warehouse>();
+		Map<Warehouse, List<Crate>> crates = new HashMap<Warehouse, List<Crate>>();
 		long money = 0L;
 		try
 		{
@@ -192,12 +192,16 @@ public class JSONReader
 				}
 			}
 			reader.endObject();
+			
+			warehouses.forEach(e -> {
+				crates.put(e, e.getCrates());
+			});
 		} catch(IOException ioe)
 		{
 			ioe.printStackTrace();
 		}
 		
-		return new Profile(id, money);
+		return new Profile(id, money, warehouses, crates);
 	}
 	
 }

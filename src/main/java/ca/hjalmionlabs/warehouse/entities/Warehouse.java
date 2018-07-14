@@ -87,6 +87,11 @@ public class Warehouse
 		return owner;
 	}
 	
+	public List<Crate> getCrates()
+	{
+		return crates;
+	}
+	
 	@Override
 	public String toString()
 	{

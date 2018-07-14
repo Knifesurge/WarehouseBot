@@ -43,6 +43,14 @@ public final class Profile implements Serializable
 		this.money = money;
 	}
 	
+	public Profile(long id, long money, List<Warehouse> warehouses, Map<Warehouse, List<Crate>> crates)
+	{
+		this.memberID = id;
+		this.money = money;
+		this.warehouses = warehouses;
+		this.crates = crates;
+	}
+	
 	public void addMoney(long amt)
 	{
 		money += amt;
