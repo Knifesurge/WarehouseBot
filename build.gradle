@@ -1,0 +1,24 @@
+plugins {
+    id'java'
+    id'application'
+    id'com.github.johnrengelman.shadow' version '1.2.4'
+}
+
+mainClassName = 'ca.hjalmionlabs.warehouse'
+
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'net.dv8tion:JDA:3.6.0_354'
+    compile 'org.slf4j:slf4j-nop:1.7.24'
+    compile 'commons-beanutils:commons-beanutils:20030211.134440'
+//    compile 'com.jagrosh:JDA-Utilities:2.1.1'
+}
+
+compileJava.options.encoding = 'UTF-8'
