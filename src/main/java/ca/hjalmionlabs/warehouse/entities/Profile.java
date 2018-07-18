@@ -93,7 +93,7 @@ public final class Profile implements Serializable
 	{
 		List<Crate> allCrates = new ArrayList<Crate>();
 		crates.forEach((key, val) -> {
-			allCrates.addAll(crates.get(key));
+			allCrates.addAll(val);
 		});
 		return allCrates;
 	}
@@ -113,7 +113,10 @@ public final class Profile implements Serializable
 	{
 		StringBuilder build = new StringBuilder();
 		User user = WarehouseBot.getJDA().getUserById(memberID);
-		build.append("\n" + user.getName() + "#" + user.getDiscriminator());
+		if(user != null)
+			build.append("\n" + user.getName() + "#" + user.getDiscriminator());
+		else
+			build.append("\n" + getID());	// Doesn't use JDA functions
 		build.append("\nMoney: " + money);
 		build.append("\nWarehouses: ");
 		if(!warehouses.isEmpty())

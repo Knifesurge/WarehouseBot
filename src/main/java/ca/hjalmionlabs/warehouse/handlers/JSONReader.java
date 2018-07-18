@@ -25,19 +25,6 @@ import net.dv8tion.jda.core.entities.User;
 public class JSONReader
 {
 	
-	public static void writeJsonStream(OutputStream out)
-	{
-		try
-		{
-			JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
-			writer.setLenient(true);
-			
-			
-		} catch(UnsupportedEncodingException e)
-		{
-			e.printStackTrace();
-		}
-	}
 	/**
 	 * Reads a JSON file as a Stream.
 	 * @param in

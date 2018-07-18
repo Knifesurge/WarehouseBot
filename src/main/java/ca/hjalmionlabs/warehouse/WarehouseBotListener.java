@@ -14,6 +14,7 @@ import ca.hjalmionlabs.warehouse.entities.Profile;
 import ca.hjalmionlabs.warehouse.entities.Warehouse;
 import ca.hjalmionlabs.warehouse.entities.WarehouseSize;
 import ca.hjalmionlabs.warehouse.handlers.JSONReader;
+import ca.hjalmionlabs.warehouse.handlers.JSONWriter;
 import ca.hjalmionlabs.warehouse.handlers.WarehouseHandler;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Guild;
@@ -200,12 +201,40 @@ public class WarehouseBotListener implements EventListener
 					embed.appendDescription("\n-------------------------");
 				}
 				sendEmbedMessage(e, embed);
+			} else if(rawMsg.equals(PRECURSOR + "writeTest"))
+			{
+				Profile profile1 = new Profile(12345678910111213L, 6969L);	// Create bogus profile
+				Profile profile2 = new Profile(987654321L, 314159L);	// Create another bogus profile
+				// Print the profiles out
+				System.out.println(profile1);
+				System.out.println(profile2);
+				if(JSONWriter.writeToJSON(Arrays.asList(profile1, profile2), Paths.get("dat\\profilesTest.dat").toFile()))
+				{
+					try {
+						List<Profile> profiles = JSONReader.readJsonStream(Files.newInputStream(Paths.get("dat\\profilesTest.dat")));
+						String combinedProfiles = profiles.get(0).toString() + "\n-=-=-=-=-=-=-=-=-=-=-\n" + profiles.get(1).toString();
+						sendMessage(e, combinedProfiles);
+						sendMessage(e, combinedProfiles);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				} else
+				{
+					sendMessage(e, "Write test failed - Unable to write to file!");
+				}
+				
 			} else if(rawMsg.equals(PRECURSOR + "createNewProfile"))
 			{
 				Profile profile = new Profile(author.getIdLong());
 				profile.setMoney(1500);
 				profile.addWarehouse(new Warehouse(WarehouseSize.SMALL, author));
 				userProfiles.put(author.getIdLong(), profile);
+				
+				if(JSONWriter.writeToJSON(Arrays.asList(profile), Paths.get("dat\\profilesTest.dat").toFile()))
+					sendMessage(e, "Write successful!");
+				else
+					sendMessage(e, "Unable to write!");
+				
 				EmbedBuilder embed = new EmbedBuilder();
 				embed.setTitle("New Profile Created!");
 				embed.appendDescription("\n" + profile);
