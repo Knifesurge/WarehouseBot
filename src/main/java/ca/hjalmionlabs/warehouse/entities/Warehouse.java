@@ -15,6 +15,16 @@ public class Warehouse
 	private User owner;			// User that owns this Warehouse
 	private List<Crate> crates;	// List of Crates currently in this Warehose
 	
+	public Warehouse()
+	{
+		this.name = "NULL";
+		this.size = WarehouseSize.UNDEFINED;
+		this.owner = null;
+		this.capacity = 0;
+		this.usage = 0;
+		crates = new ArrayList<Crate>();
+	}
+	
 	public Warehouse(String name, WarehouseSize size, User user)
 	{
 		this.name = name;
@@ -26,12 +36,13 @@ public class Warehouse
 	}
 	
 	public Warehouse(WarehouseSize size, User user)
-	{
-		if(size.toString().equals("SMALL")) 		this.name = "Basic Warehouse";
-		else if(size.toString().equals("MEDIUM")) 	this.name = "Medium Warehouse";
+	{	
+		this.size = size;
+		
+		if(size.toString().trim().equals("SMALL")) 		this.name = "Basic Warehouse";
+		else if(size.toString().trim().equals("MEDIUM")) 	this.name = "Medium Warehouse";
 		else 										this.name = "Large Warehouse";
 		
-		this.size = size;
 		this.owner = user;
 		this.capacity = calculateCapacity(size);
 		this.usage = 0;
@@ -68,9 +79,20 @@ public class Warehouse
 		return name;
 	}
 	
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	
 	public WarehouseSize getSize()
 	{
 		return size;
+	}
+	
+	public void setSize(WarehouseSize size)
+	{
+		this.size = size;
+		this.capacity = calculateCapacity(this.size);
 	}
 	
 	public int getUsage()
@@ -82,9 +104,20 @@ public class Warehouse
 	{
 		return capacity;
 	}
+	
 	public User getOwner()
 	{
 		return owner;
+	}
+	
+	public void setOwner(User owner)
+	{
+		this.owner = owner;
+	}
+	
+	public void addCrates(List<Crate> crates)
+	{
+		this.crates.addAll(crates);
 	}
 	
 	public List<Crate> getCrates()
@@ -96,7 +129,7 @@ public class Warehouse
 	public String toString()
 	{
 		StringBuilder build = new StringBuilder();
-		build.append(getName() + "\n" + getUsage() + "/" + getCapacity() + "\n=========================\n");
+		build.append(getName() + "\n" + getSize() + "\n" + getUsage() + "/" + getCapacity() + "\n=========================\n");
 		crates.forEach(e -> {
 			build.append(e.getName());
 		});

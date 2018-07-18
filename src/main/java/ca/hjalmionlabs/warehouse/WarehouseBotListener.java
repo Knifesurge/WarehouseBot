@@ -12,6 +12,7 @@ import java.util.Map;
 import ca.hjalmionlabs.warehouse.entities.Crate;
 import ca.hjalmionlabs.warehouse.entities.Profile;
 import ca.hjalmionlabs.warehouse.entities.Warehouse;
+import ca.hjalmionlabs.warehouse.entities.WarehouseSize;
 import ca.hjalmionlabs.warehouse.handlers.JSONReader;
 import ca.hjalmionlabs.warehouse.handlers.WarehouseHandler;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -201,7 +202,14 @@ public class WarehouseBotListener implements EventListener
 				sendEmbedMessage(e, embed);
 			} else if(rawMsg.equals(PRECURSOR + "createNewProfile"))
 			{
-				
+				Profile profile = new Profile(author.getIdLong());
+				profile.setMoney(1500);
+				profile.addWarehouse(new Warehouse(WarehouseSize.SMALL, author));
+				userProfiles.put(author.getIdLong(), profile);
+				EmbedBuilder embed = new EmbedBuilder();
+				embed.setTitle("New Profile Created!");
+				embed.appendDescription("\n" + profile);
+				sendEmbedMessage(e, embed);
 			} else if(rawMsg.equals(PRECURSOR + "crates"))
 			{
 				List<Crate> userCrates = userProfiles.get(author.getIdLong()).getCratesAsList();

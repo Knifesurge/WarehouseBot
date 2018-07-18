@@ -51,4 +51,9 @@ public class WarehouseHandler
 	{
 		allWarehouses.add(w);
 	}
+	
+	public List<Warehouse> getAllWarehouses()
+	{
+		return allWarehouses;
+	}
 }

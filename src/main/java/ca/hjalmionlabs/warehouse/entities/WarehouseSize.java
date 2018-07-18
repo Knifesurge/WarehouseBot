@@ -3,33 +3,34 @@ package ca.hjalmionlabs.warehouse.entities;
 public enum WarehouseSize
 {
 
-	UNDEFINED, SMALL, MEDIUM, LARGE;
+	UNDEFINED("UNDEFINED"), SMALL("SMALL"), MEDIUM("MEDIUM"), LARGE("LARGE");
+	
+	String size;
+	
+	WarehouseSize(String size)
+	{
+		this.size = size;
+	}
 	
 	public static WarehouseSize parseSize(String size)
 	{
+		// DEBUG
+		System.out.println("untrimmed: " + size);
+		size = size.trim();
+		System.out.println("trimmed: " + size);
 		if(size.equals("SMALL"))
 			return SMALL;
-		if(size.equals("MEDIUM"))
+		else if(size.equals("MEDIUM"))
 			return MEDIUM;
-		if(size.equals("LARGE"))
+		else if(size.equals("LARGE"))
 			return LARGE;
-		return UNDEFINED;
+		else
+			return UNDEFINED;
 	}
 	
 	@Override
 	public String toString()
 	{
-		for(WarehouseSize size : values())
-		{
-			if(size.equals(SMALL))
-				return "SMALL";
-			else if(size.equals(MEDIUM))
-				return "MEDIUM";
-			else if(size.equals(LARGE))
-				return "LARGE";
-			else
-				return "UNDEFINED";
-		}
-		return null;
+		return this.size;
 	}
 }

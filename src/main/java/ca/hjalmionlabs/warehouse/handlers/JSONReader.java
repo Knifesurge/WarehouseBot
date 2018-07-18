@@ -3,6 +3,8 @@ package ca.hjalmionlabs.warehouse.handlers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 import ca.hjalmionlabs.warehouse.WarehouseBot;
 import ca.hjalmionlabs.warehouse.WarehouseBotListener;
@@ -21,6 +24,20 @@ import net.dv8tion.jda.core.entities.User;
 
 public class JSONReader
 {
+	
+	public static void writeJsonStream(OutputStream out)
+	{
+		try
+		{
+			JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+			writer.setLenient(true);
+			
+			
+		} catch(UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Reads a JSON file as a Stream.
 	 * @param in
@@ -82,6 +99,7 @@ public class JSONReader
 		WarehouseSize size = WarehouseSize.UNDEFINED;
 		List<Crate> crates = new ArrayList<Crate>();
 		User owner = null;
+		Warehouse warehouse = new Warehouse();	// Create an empty Warehouse
 		try
 		{
 			reader.beginObject();
@@ -91,13 +109,18 @@ public class JSONReader
 				if(objName.equals("name"))
 					name = reader.nextString();
 				else if(objName.equals("size"))
-					size = WarehouseSize.parseSize(reader.nextString());
+				{
+					String nextString = reader.nextString();
+					size = WarehouseSize.parseSize(nextString);
+					System.out.println("SIZE: " + nextString);
+				}
 				else if(objName.equals("owner"))
 				{
 					owner = WarehouseBot.getJDA().getUserById(Long.parseLong(reader.nextString()));
 				} else if(objName.equals("crates"))
 				{
-					crates = readCratesArray(reader);
+					warehouse = new Warehouse(name, size, owner);
+					crates = readCratesArray(reader, warehouse);
 				}
 			}
 			reader.endObject();
@@ -105,10 +128,16 @@ public class JSONReader
 		{
 			ioe.printStackTrace();
 		}
-		return new Warehouse(name, size, owner, crates);
+		warehouse.setName(name);
+		warehouse.setSize(size);
+		warehouse.setOwner(owner);
+		warehouse.addCrates(crates);
+		// Add this Warehouse to the WarehouseHandler for global registration
+		WarehouseBotListener.getWarehouseHandler().addWarehouse(warehouse);
+		return warehouse;
 	}
 	
-	public static List<Crate> readCratesArray(JsonReader reader)
+	public static List<Crate> readCratesArray(JsonReader reader, Warehouse warehouse)
 	{
 		List<Crate> crates = new ArrayList<Crate>();
 		
@@ -116,7 +145,7 @@ public class JSONReader
 		{
 			reader.beginArray();
 			while(reader.hasNext())
-				crates.add(readCrate(reader));
+				crates.add(readCrate(reader, warehouse));
 			reader.endArray();
 		} catch(IOException ioe)
 		{
@@ -125,11 +154,10 @@ public class JSONReader
 		return crates;
 	}
 	
-	public static Crate readCrate(JsonReader reader)
+	public static Crate readCrate(JsonReader reader, Warehouse warehouse)
 	{
 		String name = "";
 		long value = 0L;
-		Warehouse warehouse = null;
 		long ownerID = -1L;
 		
 		try
@@ -142,8 +170,6 @@ public class JSONReader
 					name = reader.nextString();
 				else if(key.equals("value"))
 					value = Long.parseLong(reader.nextString());
-				else if(key.equals("warehouse"))
-					warehouse = WarehouseBotListener.getWarehouseHandler().getWarehouseByName(reader.nextString());
 				else if(key.equals("owner"))
 					ownerID = Long.parseLong(reader.nextString());
 				else

@@ -10,6 +10,7 @@
 								"crates":	[
 												{
 													"name": "Basic Crate",
+													"value": "150",
 													"warehouse": "Knife's Awesome Warehouse",
 													"owner": "205166483284819969"
 												}

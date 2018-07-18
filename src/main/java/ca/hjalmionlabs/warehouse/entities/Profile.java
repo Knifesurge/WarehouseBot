@@ -51,6 +51,11 @@ public final class Profile implements Serializable
 		this.crates = crates;
 	}
 	
+	public void setMoney(long amt)
+	{
+		money = amt;
+	}
+	
 	public void addMoney(long amt)
 	{
 		money += amt;
@@ -67,6 +72,11 @@ public final class Profile implements Serializable
 			System.out.println("Not enough money to spend!");
 			return false;
 		}
+	}
+	
+	public void addWarehouse(Warehouse w)
+	{
+		warehouses.add(w);
 	}
 	
 	public List<Warehouse> getWarehouses()
