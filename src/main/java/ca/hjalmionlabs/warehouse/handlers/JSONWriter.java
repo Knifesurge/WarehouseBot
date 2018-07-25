@@ -86,6 +86,8 @@ public class JSONWriter
 				}	// End of current Profile
 			});	// End of Profiles
 			writer.endArray();	// End of Profiles.dat array
+			
+			writer.flush();
 		} catch(IOException ioe)
 		{
 			ioe.printStackTrace();

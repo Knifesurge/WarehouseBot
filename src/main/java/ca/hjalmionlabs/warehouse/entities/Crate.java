@@ -1,7 +1,12 @@
 package ca.hjalmionlabs.warehouse.entities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import ca.hjalmionlabs.warehouse.WarehouseBot;
 import net.dv8tion.jda.core.entities.Member;
@@ -14,25 +19,25 @@ public class Crate
 	private Warehouse warehouse;
 	private long ownerID;
 	
-	private static List<Crate> crateList;
-	
-	
 	public Crate(String name)
 	{
 		this.name = name;
 		this.value = 0;
 		this.warehouse = null;
 		this.ownerID = -1;
-		crateList = new ArrayList<Crate>();
 	}
 	
+	/**
+	 * Creates a new Crate object. Warehouse defaults to the BotProfile's Warehouse. OwnerID defaults to -1
+	 * @param name - Name of the Crate
+	 * @param value - Value of the Crate
+	 */
 	public Crate(String name, long value)
 	{
 		this.name = name;
 		this.value = value;
-		this.warehouse = null;
+		this.warehouse = BotProfile.getWarehouse();
 		this.ownerID = -1;
-		crateList = new ArrayList<Crate>();
 	}
 	
 	public Crate(String name, long value, Warehouse warehouse, long ID)
@@ -41,7 +46,6 @@ public class Crate
 		this.value = value;
 		this.warehouse = warehouse;
 		this.ownerID = ID;
-		crateList = new ArrayList<Crate>();
 	}
 	
 	public Crate(String name, long value, Warehouse warehouse, Member member)
@@ -50,10 +54,9 @@ public class Crate
 		this.value = value;
 		this.warehouse = warehouse;
 		this.ownerID = member.getUser().getIdLong();
-		crateList = new ArrayList<Crate>();
 	}
 
-	public static List<Crate> populateCrates()
+	public static List<Crate> getListOfCrates()
 	{
 		List<Crate> crates = new ArrayList<Crate>();
 		crates.add(new Crate("Basic Crate", 100));
@@ -66,19 +69,20 @@ public class Crate
 		return crates;
 	}
 	
-	public static List<Crate> getCrateList()
+	public static Crate getCrateByName(String name) throws NoSuchElementException
 	{
-		return crateList;
-	}
-	
-	public static Crate getCrateByName(String name)
-	{
-		List<Crate> crate = new ArrayList<Crate>();
-		crateList.forEach(e -> {
-			if(e.getName().equals(name))
-				crate.add(e);
-		});
-		return crate.get(0);
+		String regex = "(?=\\p{Upper})";
+		List<String> regName = Arrays.asList(name.split(regex));
+		regName.forEach(e -> System.out.println(e));
+		String crateToFind = String.join(" ", regName.get(0), regName.get(1));
+		Set<Crate> crate = getListOfCrates().stream()
+				 .filter(e -> e.getName().equals(crateToFind))
+				 .collect(Collectors.toSet());
+		Iterator<Crate> it = crate.iterator();
+		if(it.hasNext())
+			return it.next();
+		else
+			throw new NoSuchElementException("Could not find the crate " + crateToFind + "!");
 	}
 	
 	public String getName()
@@ -101,6 +105,33 @@ public class Crate
 		return ownerID;
 	}
 	
+	public void transferTo(Profile newOwner)
+	{
+		this.ownerID = newOwner.getID();
+		Warehouse firstWarehouse = newOwner.getFirstAvailableWarehouse();
+		this.warehouse = firstWarehouse;
+		firstWarehouse.addCrates(Arrays.asList(this));
+	}
+	
+	public String toString(boolean name, boolean value, boolean warehouse, boolean owner)
+	{
+		StringBuilder build = new StringBuilder();
+		if(name)
+			build.append("\nName: " + this.name);
+		if(value)
+			build.append("\nValue: " + this.value);
+		if(warehouse)
+			build.append("\nWarehouse: " + this.warehouse.getName());
+		if(owner)
+		{
+			if(this.warehouse.equals(BotProfile.getWarehouse()))
+				build.append("\nOwner: BotProfile");
+			else
+				build.append("\nOwner: " + WarehouseBot.getJDA().getUserById(ownerID).getName());
+		}
+		return build.toString();
+	}
+	
 	@Override
 	public String toString()
 	{
@@ -108,7 +139,10 @@ public class Crate
 		build.append("\nName: " + name);
 		build.append("\nValue: " + value);
 		build.append("\nWarehouse: " + warehouse.getName());
-		build.append("\nOwner: " + WarehouseBot.getJDA().getUserById(ownerID).getName());
+		if(warehouse.equals(BotProfile.getWarehouse()))
+			build.append("\nOwner: BotProfile");
+		else
+			build.append("\nOwner: " + WarehouseBot.getJDA().getUserById(ownerID).getName());
 		return build.toString();
 	}
 	

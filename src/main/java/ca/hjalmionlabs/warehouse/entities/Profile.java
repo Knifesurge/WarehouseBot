@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import ca.hjalmionlabs.warehouse.WarehouseBot;
 import net.dv8tion.jda.core.entities.Member;
@@ -77,6 +78,26 @@ public final class Profile implements Serializable
 	public void addWarehouse(Warehouse w)
 	{
 		warehouses.add(w);
+	}
+	
+	public Warehouse getFirstAvailableWarehouse()
+	{
+		return warehouses.stream()
+				  		 .filter(e -> e.getCapacity() > e.getUsage())
+				  		 .collect(Collectors.toList())
+				  		 .get(0);
+	}
+	
+	public boolean hasWarehouseSpace()
+	{
+		List<Warehouse> allWarehouses = warehouses.stream()
+												  .filter(e -> e.getCapacity() > e.getUsage())
+												  .collect(Collectors.toList());
+		if(!allWarehouses.isEmpty())
+			return true;
+		else
+			return false;
+			
 	}
 	
 	public List<Warehouse> getWarehouses()

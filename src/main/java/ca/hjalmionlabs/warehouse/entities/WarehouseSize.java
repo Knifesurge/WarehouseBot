@@ -3,7 +3,7 @@ package ca.hjalmionlabs.warehouse.entities;
 public enum WarehouseSize
 {
 
-	UNDEFINED("UNDEFINED"), SMALL("SMALL"), MEDIUM("MEDIUM"), LARGE("LARGE");
+	UNDEFINED("UNDEFINED"), SMALL("SMALL"), MEDIUM("MEDIUM"), LARGE("LARGE"), INFINITE("INFINITE");
 	
 	String size;
 	
@@ -14,16 +14,14 @@ public enum WarehouseSize
 	
 	public static WarehouseSize parseSize(String size)
 	{
-		// DEBUG
-		System.out.println("untrimmed: " + size);
-		size = size.trim();
-		System.out.println("trimmed: " + size);
 		if(size.equals("SMALL"))
 			return SMALL;
 		else if(size.equals("MEDIUM"))
 			return MEDIUM;
 		else if(size.equals("LARGE"))
 			return LARGE;
+		else if(size.equals("INFINITE"))
+			return INFINITE;
 		else
 			return UNDEFINED;
 	}

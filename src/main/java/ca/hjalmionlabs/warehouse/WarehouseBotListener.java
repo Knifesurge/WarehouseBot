@@ -8,7 +8,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
+import ca.hjalmionlabs.warehouse.entities.BotProfile;
 import ca.hjalmionlabs.warehouse.entities.Crate;
 import ca.hjalmionlabs.warehouse.entities.Profile;
 import ca.hjalmionlabs.warehouse.entities.Warehouse;
@@ -19,7 +21,6 @@ import ca.hjalmionlabs.warehouse.handlers.WarehouseHandler;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -33,10 +34,14 @@ public class WarehouseBotListener implements EventListener
 	private List<Guild> guilds;
 	private Map<Long, Profile> userProfiles = null;
 	private static WarehouseHandler warehouseHandler;
+	private static BotProfile botProfile;
 	
 	public WarehouseBotListener()
 	{
 		warehouseHandler = new WarehouseHandler();
+		
+		botProfile = new BotProfile();
+		
 		guilds = WarehouseBot.getGuilds();
 		userProfiles = new HashMap<Long, Profile>();
 		List<Profile> profiles = new ArrayList<Profile>();
@@ -63,7 +68,8 @@ public class WarehouseBotListener implements EventListener
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		Crate.getCrateList().addAll(Crate.populateCrates());
+		System.out.println("List returned by Crate#populateCrates(): ");
+		Crate.getListOfCrates().forEach(e -> System.out.println(e));
 	}
 	
 	public void sendMessage(MessageReceivedEvent event, String msg)
@@ -76,7 +82,7 @@ public class WarehouseBotListener implements EventListener
 		event.getChannel().sendMessage(embed.build()).queue();
 	}
 	
-	private boolean checkPerms(MessageReceivedEvent event, String perm)
+/*	private boolean checkPerms(MessageReceivedEvent event, String perm)
 	{
 		Guild guild = event.getGuild();
 		Role role = guild.getRoleById(perm);
@@ -96,7 +102,7 @@ public class WarehouseBotListener implements EventListener
 			return false;
 		}
 	}
-	
+*/	
 	/**
 	 * Checks if the User that sent this message is Knifesurge by checking the User's
 	 * snowflake id (which is unique to every entity and will never change)
@@ -212,9 +218,9 @@ public class WarehouseBotListener implements EventListener
 				{
 					try {
 						List<Profile> profiles = JSONReader.readJsonStream(Files.newInputStream(Paths.get("dat\\profilesTest.dat")));
-						String combinedProfiles = profiles.get(0).toString() + "\n-=-=-=-=-=-=-=-=-=-=-\n" + profiles.get(1).toString();
-						sendMessage(e, combinedProfiles);
-						sendMessage(e, combinedProfiles);
+						profiles.forEach(p ->{
+							sendMessage(e, p.toString());
+						});
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
@@ -248,24 +254,86 @@ public class WarehouseBotListener implements EventListener
 					embed.appendDescription(c.toString());
 				});
 				sendEmbedMessage(e, embed);
-			} else if(rawMsg.startsWith(PRECURSOR + "buy"))
+			} else if(rawMsg.equals(PRECURSOR + "buy"))	// Buying but with no arguments
 			{
+				EmbedBuilder build = new EmbedBuilder();
+				build.setTitle("Buy Command Arguments");
+				build.setDescription("Command Usage:\n\n$buy (crate/warehouse/c/w) (name) [amt]\n");
+				build.appendDescription("crate/warehouse/w/c \t- Buy a crate or a warehouse\n");
+				build.appendDescription("name \t- Name of the crate or warehouse to buy (can be found" +
+												 " by using the $listCrates or $listWarehouses commands\n");
+				build.appendDescription("amt \t- Number of crates that you want to buy.\n\n");
+				build.appendDescription("Examples:\n");
+				build.appendDescription("$buy crate 'BasicCrate' 5\n");
+				build.appendDescription("$buy c 'BobCrate' 69\n");
+				build.appendDescription("$buy warehouse 'MediumWarehouse' 2\n");
+				build.appendDescription("$buy w 'LargeWarehouse'\t- If amt is left out, defaults to 1\n");
+				sendEmbedMessage(e, build);
+			} else if(rawMsg.startsWith(PRECURSOR + "buy"))	// Buying but with actual arguments
+			{
+				User user = e.getAuthor();
+				Profile profile = userProfiles.get(user.getIdLong());
 				String wholeMsg = rawMsg;
 				List<String> pieces = Arrays.asList(wholeMsg.split(" "));
-				String buying = pieces.get(0);	// Crates or a Warehouse?
-				String name = pieces.get(1);	// Name of crate or warehouse
-				String amt = pieces.get(2);		// Amount User is buying
-				if(buying.equals("crates"))
+				pieces.forEach(w -> w = w.trim());
+				String buying = pieces.get(1);	// Crates or a Warehouse?
+				String name = pieces.get(2);	// Name of crate or warehouse
+				String amt;
+				if(pieces.size() == 4)	// User entered a custom amount to buy
+					amt = pieces.get(3);		// Amount User is buying
+				else					// Default to 1
+					amt = "1";
+				pieces.forEach(p -> System.out.println(p));
+				if(buying.equals("crates") || buying.equals("c"))
 				{
-					Crate toBuy = Crate.getCrateByName(name);
+					Crate toBuy = null;
+					try
+					{
+						toBuy = Crate.getCrateByName(name);
+					} catch(NoSuchElementException nse)
+					{
+						System.err.println(nse.getMessage());
+						nse.printStackTrace();
+						sendMessage(e, "Unable to find the crate " + name);
+					}
+
+					int cost = (int) (toBuy.getValue() * Integer.parseInt(amt));
 					
-				} else if(buying.equals("warehouse"))
+					if(profile.getMoney() >= cost && profile.hasWarehouseSpace())
+					{
+						toBuy.transferTo(profile);
+						sendMessage(e, "Purchase successful! Enjoy your new " + toBuy.getName() + "!");
+					} else if(profile.getMoney() >= cost && !profile.hasWarehouseSpace())
+					{
+						sendMessage(e, "Enough money, but not enough warehouse space!");
+						return;
+					} else if(!(profile.getMoney() >= cost) && profile.hasWarehouseSpace())
+					{
+						sendMessage(e, "Enough warehouse space, but not enough money!");
+						return;
+					} else if(!(profile.getMoney() >= cost) && !profile.hasWarehouseSpace())
+					{
+						sendMessage(e, "Not enough money or warehouse space!");
+						return;
+					} else
+					{
+						sendMessage(e, "An error occurred during the transactions, please notify an administrator");
+						return;
+					}
+					
+				} else if(buying.equals("warehouse") || buying.equals("w"))
 				{
 					
 				} else
 				{
 					sendMessage(e, "Invalid argument!");	// DEBUG
 				}
+			} else if(rawMsg.equals(PRECURSOR + "crateList"))
+			{
+				EmbedBuilder embed = new EmbedBuilder();
+				embed.setTitle("List of Currently Crates");
+				Crate.getListOfCrates().forEach(c -> embed.appendDescription(c.toString(true, true, false, false)));
+				sendEmbedMessage(e, embed);
 			}
 		}
 	}

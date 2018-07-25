@@ -13,7 +13,7 @@ public class Warehouse
 	private int capacity;		// How much the warehouse can hold
 	private int usage;			// How much the warehouse is currently holding
 	private User owner;			// User that owns this Warehouse
-	private List<Crate> crates;	// List of Crates currently in this Warehose
+	private List<Crate> crates;	// List of Crates currently in this Warehouse
 	
 	public Warehouse()
 	{
@@ -69,6 +69,8 @@ public class Warehouse
 				return 32;
 			case LARGE:
 				return 64;
+			case INFINITE:
+				return 1_000_000;
 			default:
 				return -1;
 		}
@@ -115,9 +117,16 @@ public class Warehouse
 		this.owner = owner;
 	}
 	
-	public void addCrates(List<Crate> crates)
+	public void addCrates(List<Crate> crates) throws IllegalStateException
 	{
-		this.crates.addAll(crates);
+		int newUsage = this.usage + crates.size();
+		if(newUsage > this.capacity)
+			throw new IllegalStateException(); 
+		else
+		{
+			this.crates.addAll(crates);
+			this.usage += crates.size();
+		}
 	}
 	
 	public List<Crate> getCrates()

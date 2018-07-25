@@ -1,6 +1,5 @@
 package ca.hjalmionlabs.warehouse;
 
-import java.io.File;
 import java.util.List;
 
 import javax.security.auth.login.LoginException;
@@ -17,7 +16,6 @@ public class WarehouseBot
 {
 	private static JDA jda;
 	private static String BOT_TOKEN;
-	private List<File> files;
 	
 	public static void main(String[] args)
 	{
