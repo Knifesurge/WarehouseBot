@@ -19,7 +19,7 @@ dependencies {
     compile 'net.dv8tion:JDA:3.7.1_385'
     compile 'org.slf4j:slf4j-nop:1.7.24'
     compile 'commons-beanutils:commons-beanutils:20030211.134440'
-    compile 'com.google.code.gson:gson:2.4.2'
+    compile 'com.google.code.gson:gson:2.6.2'
 //    compile 'com.jagrosh:JDA-Utilities:2.1.1'
 }
 
