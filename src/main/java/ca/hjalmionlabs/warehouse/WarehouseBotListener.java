@@ -1,6 +1,8 @@
 package ca.hjalmionlabs.warehouse;
 
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -85,6 +87,31 @@ public class WarehouseBotListener implements EventListener
 		event.getChannel().sendMessage(embed.build()).queue();
 	}
 	
+	private String executeCommand(String cmd, boolean wait, boolean output)
+	{
+		StringBuffer strbuff = new StringBuffer();
+		Process p;
+
+		try
+		{
+			p = Runtime.getRuntime().exec(cmd);
+			if(wait)
+				p.waitFor();
+			if(output)
+			{
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line = "";
+				while((line = reader.readLine()) != null)
+				{
+					strbuff.append(line + "\n");
+				}
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		return strbuff.toString();
+	}
 /*	private boolean checkPerms(MessageReceivedEvent event, String perm)
 	{
 		Guild guild = event.getGuild();
@@ -138,6 +165,15 @@ public class WarehouseBotListener implements EventListener
 				if(isKnifesurge(e))
 				{
 //					FileHandler.writeFile("dat\\profiles.dat", userProfiles);
+					WarehouseBot.getJDA().shutdown();
+				}
+			} else if(rawMsg.equals(PRECURSOR + "restart"))
+			{
+				if(isKnifesurge(e))
+				{
+					String command = "sudo bash run.sh";
+					executeCommand(command, false, false);
+					sendMessage(e, "Restarting!");
 					WarehouseBot.getJDA().shutdown();
 				}
 			} else if(rawMsg.equals(PRECURSOR + "help"))
