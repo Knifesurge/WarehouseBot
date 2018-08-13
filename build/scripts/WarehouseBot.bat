@@ -66,7 +66,7 @@ set CMD_LINE_ARGS=%*
 set CLASSPATH=%APP_HOME%\lib\WarehouseBot-1.0.jar;%APP_HOME%\lib\JDA-3.7.1_385.jar;%APP_HOME%\lib\slf4j-nop-1.7.24.jar;%APP_HOME%\lib\commons-beanutils-20030211.134440.jar;%APP_HOME%\lib\gson-2.6.2.jar;%APP_HOME%\lib\jsr305-3.0.2.jar;%APP_HOME%\lib\slf4j-api-1.7.25.jar;%APP_HOME%\lib\commons-collections4-4.1.jar;%APP_HOME%\lib\json-20160810.jar;%APP_HOME%\lib\trove4j-3.0.3.jar;%APP_HOME%\lib\opus-java-1.0.2.jar;%APP_HOME%\lib\nv-websocket-client-2.4.jar;%APP_HOME%\lib\okhttp-3.8.1.jar;%APP_HOME%\lib\opus-java-api-1.0.2.jar;%APP_HOME%\lib\opus-java-natives-1.0.2.jar;%APP_HOME%\lib\okio-1.13.0.jar;%APP_HOME%\lib\jna-4.4.0.jar
 
 @rem Execute WarehouseBot
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %WAREHOUSE_BOT_OPTS%  -classpath "%CLASSPATH%" src.main.java.ca.hjalmionlabs.warehouse %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %WAREHOUSE_BOT_OPTS%  -classpath "%CLASSPATH%" ca.hjalmionlabs.warehouse.WarehouseBot %CMD_LINE_ARGS%
 
 :end
 @rem End local scope for the variables with windows NT shell

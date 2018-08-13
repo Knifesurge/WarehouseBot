@@ -2,9 +2,10 @@ plugins {
     id'java'
     id'application'
     id'com.github.johnrengelman.shadow' version '1.2.4'
+    id'eclipse'
 }
 
-mainClassName = 'src.main.java.ca.hjalmionlabs.warehouse'
+mainClassName = 'ca.hjalmionlabs.warehouse.WarehouseBot'
 
 version '1.0'
 
@@ -21,6 +22,12 @@ dependencies {
     compile 'commons-beanutils:commons-beanutils:20030211.134440'
     compile 'com.google.code.gson:gson:2.6.2'
 //    compile 'com.jagrosh:JDA-Utilities:2.1.1'
+}
+
+run {
+	if (project.hasProperty("token")) {
+		args Eval.me(token)
+	}
 }
 
 compileJava.options.encoding = 'UTF-8'

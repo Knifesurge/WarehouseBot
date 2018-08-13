@@ -46,7 +46,10 @@ public class WarehouseBotListener implements EventListener
 		userProfiles = new HashMap<Long, Profile>();
 		List<Profile> profiles = new ArrayList<Profile>();
 		try {
-			profiles = JSONReader.readJsonStream(Files.newInputStream(Paths.get("dat\\profiles.dat")));
+			if(System.getProperty("os.name").toLowerCase().contains("win"))
+				profiles = JSONReader.readJsonStream(Files.newInputStream(Paths.get("dat\\profiles.dat")));
+			else
+				profiles = JSONReader.readJsonStream(Files.newInputStream(Paths.get("dat/profiles.dat")));
 			profiles.forEach(e -> {
 				System.out.println(e);
 				userProfiles.put(e.getID(), e);
